@@ -1,0 +1,174 @@
+Medium Level:
+Problem Statement:
+Build a program to perform CRUD operations (Create, Read, Update, Delete) on a database table Product with columns:
+ProductID, ProductName, Price, and Quantity.
+The program should include:
+Menu-driven options for each operation.
+Transaction handling to ensure data integrity.
+
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Scanner;
+
+public class ProductCRUD {
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/your_database";
+    private static final String USER = "your_username";
+    private static final String PASSWORD = "your_password";
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\nMenu:");
+            System.out.println("1. Add Product");
+            System.out.println("2. View Products");
+            System.out.println("3. Update Product");
+            System.out.println("4. Delete Product");
+            System.out.println("5. Exit");
+            
+            System.out.print("Choose an option (1-5): ");
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1 -> addProduct(scanner);
+                case 2 -> viewProducts();
+                case 3 -> updateProduct(scanner);
+                case 4 -> deleteProduct(scanner);
+                case 5 -> {
+                    System.out.println("Exiting...");
+                    return;
+                }
+                default -> System.out.println("Invalid choice! Please try again.");
+            }
+        }
+    }
+
+    private static void addProduct(Scanner scanner) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD)) {
+            System.out.print("Enter Product ID: ");
+            int productId = scanner.nextInt();
+            
+            scanner.nextLine(); 
+            
+            System.out.print("Enter Product Name: ");
+            String productName = scanner.nextLine();
+            
+            System.out.print("Enter Price: ");
+            double price = scanner.nextDouble();
+            
+            System.out.print("Enter Quantity: ");
+            int quantity = scanner.nextInt();
+
+            String query = "INSERT INTO Product (ProductID, ProductName, Price, Quantity) VALUES (?, ?, ?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            
+            pstmt.setInt(1, productId);
+            pstmt.setString(2, productName);
+            pstmt.setDouble(3, price);
+            pstmt.setInt(4, quantity);
+
+            pstmt.executeUpdate();
+            
+            System.out.println("Product added successfully!");
+        } catch (Exception e) {
+            System.out.println("Error adding product: " + e.getMessage());
+        }
+    }
+
+    private static void viewProducts() {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD)) {
+            String query = "SELECT * FROM Product";
+            
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            
+            ResultSet rs = pstmt.executeQuery();
+
+            System.out.println("\nProducts:");
+            
+            while (rs.next()) {
+                int productId = rs.getInt("ProductID");
+                String productName = rs.getString("ProductName");
+                double price = rs.getDouble("Price");
+                int quantity = rs.getInt("Quantity");
+
+                System.out.printf("ID: %d | Name: %s | Price: %.2f | Quantity: %d%n", productId, productName, price, quantity);
+            }
+        } catch (Exception e) {
+            System.out.println("Error viewing products: " + e.getMessage());
+        }
+    }
+
+    private static void updateProduct(Scanner scanner) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD)) {
+            System.out.print("\nEnter Product ID to update:");
+            int id = scanner.nextInt();
+            
+            scanner.nextLine(); 
+            
+            System.out.print("Enter new Product Name: ");
+            String productName = scanner.nextLine();
+            
+            System.out.print("Enter new Price: ");
+            double price = scanner.nextDouble();
+            
+            System.out.print("Enter new Quantity: ");
+            int quantity = scanner.nextInt();
+
+            String query = "UPDATE Product SET ProductName = ?, Price = ?, Quantity = ? WHERE ProductID = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            
+            pstmt.setString(1, productName);
+            pstmt.setDouble(2, price);
+            pstmt.setInt(3, quantity);
+            pstmt.setInt(4, id);
+
+            pstmt.executeUpdate();
+            
+            System.out.println("Product updated successfully!");
+        } catch (Exception e) {
+            System.out.println("Error updating product: " + e.getMessage());
+        }
+    }
+
+    private static void deleteProduct(Scanner scanner) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD)) {
+            System.out.print("\nEnter Product ID to delete:");
+            int id = scanner.nextInt();
+
+            String query = "DELETE FROM Product WHERE ProductID = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            
+            pstmt.setInt(1, id);
+
+            pstmt.executeUpdate();
+            
+            System.out.println("Product deleted successfully!");
+        } catch (Exception e) {
+            System.out.println("Error deleting product: " + e.getMessage());
+        }
+    }
+}
+
+
+OUTPUT:
+Let's assume you choose option 1 to add a product, then option 2 to view products.
+
+Add Product:
+
+Enter Product ID: 1
+
+Enter Product Name: Apple
+
+Enter Price: 10.99
+
+Enter Quantity: 100
+
+Output:
+Product added successfully!
+View Products:
+If the Product table contains the newly added product, the output will be:
+Products:
+ID: 1 | Name: Apple | Price: 10.99 | Quantity: 100

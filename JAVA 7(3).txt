@@ -1,0 +1,114 @@
+Hard Level:
+Problem Statement:
+Develop a Java application using JDBC and MVC architecture to manage student data. The application should:
+Use a Student class as the model with fields like StudentID, Name, Department, and Marks.
+Include a database table to store student data.
+Allow the user to perform CRUD operations through a simple menu-driven view.
+Implement database operations in a separate controller class.
+
+
+public class Student {
+    private int studentID;
+    private String name;
+    private String department;
+    private double marks;
+
+    public int getStudentID() { return studentID; }
+    public void setStudentID(int studentID) { this.studentID = studentID; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
+    public double getMarks() { return marks; }
+    public void setMarks(double marks) { this.marks = marks; }
+}
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class StudentController {
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/your_database";
+    private static final String USER = "your_username";
+    private static final String PASSWORD = "your_password";
+
+    public void createStudent(Student student) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD)) {
+            String query = "INSERT INTO Student (StudentID, Name, Department, Marks) VALUES (?, ?, ?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, student.getStudentID());
+            pstmt.setString(2, student.getName());
+            pstmt.setString(3, student.getDepartment());
+            pstmt.setDouble(4, student.getMarks());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error creating student: " + e.getMessage());
+        }
+    }
+
+    public void readStudents() {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD)) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM Student");
+
+            while (rs.next()) {
+                int studentID = rs.getInt("StudentID");
+                String name = rs.getString("Name");
+                String department = rs.getString("Department");
+                double marks = rs.getDouble("Marks");
+
+                System.out.println("StudentID: " + studentID + ", Name: " + name + ", Department: " + department + ", Marks: " + marks);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error reading students: " + e.getMessage());
+        }
+    }
+
+    public void updateStudent(Student student) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD)) {
+            String query = "UPDATE Student SET Name = ?, Department = ?, Marks = ? WHERE StudentID = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, student.getName());
+            pstmt.setString(2, student.getDepartment());
+            pstmt.setDouble(3, student.getMarks());
+            pstmt.setInt(4, student.getStudentID());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error updating student: " + e.getMessage());
+        }
+    }
+
+    public void deleteStudent(int studentID) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD)) {
+            String query = "DELETE FROM Student WHERE StudentID = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, studentID);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error deleting student: " + e.getMessage());
+        }
+    }
+}
+
+
+OUTPUT:
+Let's assume you choose option 1 to add a student, then option 2 to view students.
+
+Add Student:
+
+Enter Student ID: 1
+
+Enter Student Name: John Doe
+
+Enter Department: Computer Science
+
+Enter Marks: 85.0
+
+Output:
+Student added successfully!
+View Students:
+
+If the Student table contains the newly added student, the output will be:
+StudentID: 1, Name: John Doe, Department: Computer Science, Marks: 85.0
